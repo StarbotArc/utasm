@@ -28,15 +28,6 @@ WindowAPIKeyType key_type(int codepoint)
 WindowAPILoop loop()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	glBegin(GL_QUADS);
-
-	glVertex2f(-0.5, -0.5);
-	glVertex2f(0.5, -0.5);
-	glVertex2f(0.5, 0.5);
-	glVertex2f(-0.5, 0.5);
-
-	glEnd();
 }
 
 int main()

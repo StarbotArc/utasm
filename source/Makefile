@@ -1,9 +1,6 @@
 include ../vars.mk
 
-build: clean simfile/*.c window/*.c
-	$(CC) -c simfile/*.c -o ../binary/simfile.o
-	$(CC) -c window/*.c -o ../binary/window.o
-clean: 
-ifneq (, $(wildcard ../binary/*.o))
-	rm ../binary/*.o
-endif
+build: simfile/*.c window/*.c
+	$(MAKE) -C graphics build
+	$(CC) -c simfile/*.c -o ../binary/build/simfile.o
+	$(CC) -c window/*.c -o ../binary/build/window.o
