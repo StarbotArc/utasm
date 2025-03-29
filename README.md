@@ -1,2 +1,2 @@
 # utasm
-My final solution to making my suffering easier
+    A modern StepMania chart editor, with the goal of being an efficient as possible editor.
