@@ -1,2 +1,5 @@
 binary/build/*
 binary/release/*
+
+Makefile
+*.mk
