@@ -17,7 +17,8 @@ build-release: setup clean
 	cp binary/build/utasm-release binary/release/utasm
 
 package:
-	tar -cf utasm.tar.xz binary/release/* binary/assets
+	cd ./binary && tar -cf utasm.tar.xz assets/*
+	cd ./binary/release && tar -rf ../utasm.tar.xz utasm
 
 clean:
 ifneq (, $(wildcard ./binary/build/utasm))
@@ -31,4 +32,4 @@ ifneq (, $(wildcard ./binary/build/*.o))
 endif
 
 stop-use:
-	rm ./Makefile
+	rm ./vars.mk ./Makefile
