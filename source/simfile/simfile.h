@@ -29,8 +29,9 @@ typedef struct
 	char* author;
 
 	list bpms;
+	list stops;
 
-	unsigned char rows_size;
+	unsigned char key_count;
 	list rows;
 } simfile_t;
 
