@@ -6,13 +6,23 @@
 typedef struct
 {
 	float beat; 
-	void value;
+	union
+	{
+		float f;
+		const char* str;
+	} value;
 } simfile_event_t;
+
+typedef union
+{
+	simfile_event_t event;
+	unsigned int notedata;
+} simfile_item_t;
 
 typedef struct
 {
 	unsigned long size;
-	void* items;
+	simfile_item_t* items;
 } simfile_list_t;
 
 typedef struct
@@ -39,6 +49,10 @@ typedef struct
 
 simfile_t* simfile_create();
 simfile_t* simfile_load(char* path);
+
+void simfile_export(simfile_t* simfile, char* path, char* as);
+
+void simfile_destroy(simfile_t* simfile);
 
 void simfile_add_event(simfile_t* file, const char* event, simfile_event_t value);
 

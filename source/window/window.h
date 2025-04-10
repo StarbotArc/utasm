@@ -20,6 +20,9 @@
 typedef struct
 {
 	GladGLContext* context;
+
+	int width;
+	int height;
 } window_context_t;
 
 typedef int (*WindowAPICreateCallback)(window_context_t);

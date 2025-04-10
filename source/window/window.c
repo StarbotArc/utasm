@@ -63,6 +63,8 @@ static void resize(GLFWwindow* window, int width, int height)
 {
 	window_t* native_window = find_native_window_with_glfw_window(window);
 	native_window->resize_callback(native_window->context, width, height);
+	native_window->context.width = width;
+	native_window->context.height = height;
 }
 
 static void mouse_move(GLFWwindow* window, double x, double y)
@@ -123,6 +125,9 @@ window_t* window_create(const char* title, int width, int height)
 	native_window->key_press_callback = pl_key_press;
 	native_window->key_type_callback = pl_key_type;
 
+	native_window->context.width = width;
+	native_window->context.height = height;
+
 	GLFWwindow* glfw_window = glfwCreateWindow(width, height, title, NULL, NULL);
 
 	if (!glfw_window)
@@ -144,7 +149,7 @@ window_t* window_create(const char* title, int width, int height)
 	}
 
 	int version = gladLoadGLContext(context, glfwGetProcAddress);
-	printf("Created OpenGL %d.%d instance.", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	printf("Created OpenGL %d.%d instance.\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 	fflush(stdout);
 
 	native_window->context.context = context;
