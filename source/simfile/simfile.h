@@ -50,7 +50,7 @@ typedef struct
 simfile_t* simfile_create();
 simfile_t* simfile_load(char* path);
 
-void simfile_export(simfile_t* simfile, char* path, char* as);
+void simfile_export(simfile_t* simfile, char* path);
 
 void simfile_destroy(simfile_t* simfile);
 
