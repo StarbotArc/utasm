@@ -33,6 +33,7 @@ simfile_t* simfile_create()
 	for (int i = 0; i < 4; i++)
 	{
 		simfile->rows.items[i].notedata = 1 << i;
+		printf("%d\n", simfile->rows.items[i].notedata);
 	}
 
 	return simfile;
