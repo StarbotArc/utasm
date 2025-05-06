@@ -5,6 +5,8 @@
 #include "window/window.h"
 #include "simfile/simfile.h"
 
+#define F(X) (int)X+289
+
 extern unsigned char icon_raw[];
 
 static const char* vertex_shader_source =
@@ -171,11 +173,16 @@ static WindowAPIMousePress mouse_press(int button, int actions, int mods)
 static WindowAPIMouseScroll mouse_scroll(double x, double y)
 {
 }
-
+*/
 static WindowAPIKeyPress key_press(int button, int actions, int mods)
 {
+	switch (button)
+	{
+		case F(12):
+			break;
+	}
 }
-static WindowAPIKeyType key_type(int code)
+/* static WindowAPIKeyType key_type(int code)
 {
 } */
 
@@ -199,6 +206,8 @@ int main()
 	window_set_destroy_callback(window_1, destroy);
 
 	window_set_resize_callback(window_1, resize);
+
+	window_set_key_press_callback(window_1, key_press);
 
 	window_run(window_1);
 

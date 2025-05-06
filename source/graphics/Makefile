@@ -1,4 +1,4 @@
 include ../../vars.mk
 
 build:
-	$(MAKE) -C glmaid build
+	$(MAKE) -C glmaid build -I./

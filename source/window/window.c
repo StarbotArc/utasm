@@ -17,19 +17,19 @@ static unsigned int instance_alloc;
 
 /* Placeholder events */
 
-static WindowAPICreate pl_create() { return 0; }
-static WindowAPIDestroy pl_destroy() {}
+static WindowAPICreate pl_create(window_context_t context) { return 0; }
+static WindowAPIDestroy pl_destroy(window_context_t context) {}
 
-static WindowAPILoop pl_loop() {}
+static WindowAPILoop pl_loop(window_context_t context) {}
 
-static WindowAPIResize pl_resize() {}
+static WindowAPIResize pl_resize(window_context_t context, unsigned int width, unsigned int height) {}
 
-static WindowAPIMouseMove pl_mouse_move() {}
-static WindowAPIMousePress pl_mouse_press() {}
-static WindowAPIMouseScroll pl_mouse_scroll() {}
+static WindowAPIMouseMove pl_mouse_move(double x, double y) {}
+static WindowAPIMousePress pl_mouse_press(int button, int action, int mod) {}
+static WindowAPIMouseScroll pl_mouse_scroll(double x, double y) {}
 
-static WindowAPIKeyPress pl_key_press() {}
-static WindowAPIKeyType pl_key_type() {}
+static WindowAPIKeyPress pl_key_press(int button, int action, int mod) {}
+static WindowAPIKeyType pl_key_type(int keycode) {}
 
 /* Utilities functions */
 

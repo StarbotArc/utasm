@@ -10,10 +10,10 @@ endif
 
 build: setup clean
 	$(MAKE) -C source build
-	$(CC) $(FLAGS) source/*.c -o binary/build/utasm binary/build/*.o $(LIBRARIES)
+	$(CC) $(FLAGS) source/*.c -o binary/build/utasm binary/build/*.o $(INCLUDES) $(LIBRARIES)
 build-release: setup clean
 	$(MAKE) -C source build
-	$(CC) $(RELEASE_FLAGS) source/*.c -o binary/build/utasm-release binary/build/*.o $(LIBRARIES)
+	$(CC) $(RELEASE_FLAGS) source/*.c -o binary/build/utasm-release binary/build/*.o $(INCLUDES) $(LIBRARIES)
 	cp binary/build/utasm-release.exe binary/release/utasm.exe
 
 package:
