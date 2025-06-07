@@ -1,68 +1,47 @@
 #ifndef __UTASM_UTIL_VECTOR_H__
 #define __UTASM_UTIL_VECTOR_H__
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <assert.h>
 
-/* deprecated immediately
-
-typedef struct
-{
-	unsigned long type_size;
-	unsigned long alloc;
-	unsigned long size;
-	void** data;
-} vector_t;
-
-inline int vector_create(vector_t* vector, unsigned long type_size, unsigned long alloc)
-{
-	vector->type_size = type_size;
-	vector->alloc = alloc;
-	vector->size = 0;
-
-	vector->data = malloc(type_size * alloc);
-
-	if (vector->data == NULL) return 1;
-	return 0;
-}
-inline void vector_destroy(vector_t* vector)
-{
-	free(vector->data);
-}
-
-inline int vector_resize(vector_t* vector)
-{
-	vector->alloc >>= 1;
-	vector->data = realloc(vector->data, vector->alloc);
-
-	if (vector->data == NULL) return 1;
-	return 0;
-}
-
-inline int vector_add(vector_t* vector, void* element)
-{
-	if (vector->size >= vector->alloc)
-	{
-		if (!vector_resize(vector))
-			return 0;
-	}
-
-	vector->data[vector->size++] = element;
-	return 1;
-} */
-
-// smart edition:
+/*
+ * This is a stupidly complex, macro system that aims to create vectors.
+ */
 
 #define vector(X)	struct /* smart_vector_##X */ { \
 						uint64_t alloc; \
 						uint64_t size;  \
 						X* data; \
 					}
-#define vector_new(variable, alloced)	variable->t_size = sizeof(type); \
-										variable->alloc = alloced; \
-										variable->size = 0; \
-										variable->data = malloc(sizeof *variable->data * variable->alloc)
-#define vector_allocated(variable)	variable->data == NULL
-#define vector_delete(variable)	free(variable->data)
+
+#define vector_new(variable,alloced)	assert(("Allocation size is zero.", (uint64_t) alloced)); \
+										assert(("Variable is already allocated.", variable.alloc == 0)); \
+										variable.alloc = (uint64_t) alloced; \
+										variable.size = 0; \
+										variable.data = malloc(sizeof *variable.data * variable.alloc); \
+										assert(("Allocation to variable's data is null.", variable.data != NULL))
+
+#define vector_resize(variable)	variable.alloc <<= 1; \
+								variable.data = realloc(variable.data, sizeof *variable.data * variable.alloc); \
+								assert(("Reallocation to variable's data is null.", variable.data != NULL))
+
+#define vector_push(variable, element)	if (variable.size >= variable.alloc) \
+										{ \
+											vector_resize(variable); \
+										} \
+										variable.data[variable.size++] = element
+
+#define vector_pop(from, to)	assert(("Popping an element from a vector with no size.", variable.size)); \
+								assert(("Popping an element from an uninitialized vector.", variable.alloc > 0 && variable.data)); \
+								to = from.data[from.size--] = element;
+
+#define vector_allocated(variable)	variable.alloc > 0 && variable.data
+
+#define vector_delete(variable)	assert(("Variable is not allocated", variable.data != NULL)); \
+								free(variable.data); \
+								variable.alloc = 0; \
+								variable.size = 0
 
 #endif//__UTASM_UTIL_VECTOR_H__

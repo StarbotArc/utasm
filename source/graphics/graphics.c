@@ -20,9 +20,19 @@ static int pipeline_destroy_texture(struct s_graphics_pipeline* self, uint32_t t
 
 int graphics_create_pipeline(graphics_pipeline_t* pipeline, GladGLContext* context)
 {
+	pipeline->buffers.alloc = 0;
+	pipeline->vertex_arrays.alloc = 0;
+	pipeline->texture_cache.alloc = 0;
+	pipeline->shader_queue.alloc = 0;
+
+	vector_new(pipeline->buffers, 4);
+	vector_new(pipeline->vertex_arrays, 4);
+	vector_new(pipeline->texture_cache, 4);
+	vector_new(pipeline->shader_queue, 4);
+
 	//if (vector_create(&pipeline->buffers, sizeof(uint32_t), 4)) return 1;
 	//if (vector_create(&pipeline->vertex_arrays, sizeof(uint32_t), 4)) return 1;
-	// //if (vector_create(&pipeline->texture_cache, sizeof(uint32_t), 4)) return 1;
+	//if (vector_create(&pipeline->texture_cache, sizeof(uint32_t), 4)) return 1;
 	//if (vector_create(&pipeline->shader_queue, sizeof(uint32_t), 4)) return 1;
 
 	pipeline->create_buffer = pipeline_create_buffer;
@@ -45,20 +55,32 @@ void graphics_destroy_pipeline(graphics_pipeline_t pipeline)
 {
 	GladGLContext* gl = pipeline.context;
 
-	for (int i = 0; i < pipeline.buffers.size; i++)
+	if (vector_allocated(pipeline.buffers))
 	{
-		uint32_t buffer = pipeline.buffers.data[i];
-		if (!gl->IsBuffer(buffer)) continue;
+		for (int i = 0; i < pipeline.buffers.size; i++)
+		{
+			uint32_t buffer = pipeline.buffers.data[i];
+			if (!gl->IsBuffer(buffer)) continue;
 
-		gl->DeleteBuffers(1, &buffer);
+			gl->DeleteBuffers(1, &buffer);
+		}
 	}
-	for (int i = 0; i < pipeline.vertex_arrays.size; i++)
+	if (vector_allocated(pipeline.vertex_arrays))
 	{
-		uint32_t vertex_array = pipeline.vertex_arrays.data[i];
-		if (!gl->IsVertexArray(vertex_array)) continue;
+		for (int i = 0; i < pipeline.vertex_arrays.size; i++)
+		{
+			uint32_t vertex_array = pipeline.vertex_arrays.data[i];
+			if (!gl->IsVertexArray(vertex_array)) continue;
 
-		gl->DeleteVertexArrays(1, &vertex_array);
+			gl->DeleteVertexArrays(1, &vertex_array);
+		}
 	}
+
+	vector_delete(pipeline.buffers);
+	vector_delete(pipeline.vertex_arrays);
+	vector_delete(pipeline.texture_cache);
+	vector_delete(pipeline.shader_queue);
+	free(gl);
 }
 
 uint32_t pipeline_create_buffer(struct s_graphics_pipeline* self, void* data, uint64_t size, uint32_t type, uint32_t usage)
@@ -92,23 +114,23 @@ unsigned int pipeline_create_shader(struct s_graphics_pipeline* self, const char
 {
 	GladGLContext* gl = self->context;
 
-	unsigned int* shader = malloc(sizeof *shader);
-	shader[0] = gl->CreateShader(type);
-	gl->ShaderSource(shader[0], 1, &source, NULL);
-	gl->CompileShader(shader[0]);
+	unsigned int shader;
+	shader = gl->CreateShader(type);
+	gl->ShaderSource(shader, 1, &source, NULL);
+	gl->CompileShader(shader);
 
 	char buffer[512];
 	int success;
 
-	gl->GetShaderiv(shader[0], GL_COMPILE_STATUS, &success);
+	gl->GetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (success)
 	{
 		printf("[Shader]: %s\n", buffer);
 		return -1;
 	}
 
-	//vector_add(&self->shader_queue, shader);
-	return shader[0];
+	vector_push(self->shader_queue, shader);
+	return shader;
 }
 unsigned int pipeline_finish_program(struct s_graphics_pipeline* self, uint32_t flags)
 {
