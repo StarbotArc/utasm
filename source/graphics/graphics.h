@@ -1,7 +1,10 @@
 #ifndef __UTASM_GRAPHICS_GRAPHICS_H__
 #define __UTASM_GRAPHICS_GRAPHICS_H__
 
+#include <stdlib.h>
+
 #include <util/vector.h>
+
 #include "glmaid/OpenGL/gl.h"
 
 #define GRAPHICS__BUFFER_TYPE__ELEMENT 1
@@ -15,38 +18,38 @@ typedef struct s_graphics_pipeline
 	unsigned int header;
 	GladGLContext* context;
 
-	vector_t buffers;
-	vector_t vertex_arrays;
+	vector(uint32_t) buffers;
+	vector(uint32_t) vertex_arrays;
 
-	vector_t texture_cache;
+	vector(uint32_t) texture_cache;
 
-	unsigned int program_queued;
-	vector_t shader_queue;
+	uint32_t program_queued;
+	vector(uint32_t) shader_queue;
 
-	unsigned int (*create_buffer)(struct s_graphics_pipeline* self, void* data, unsigned long size, int type, int usage);
-	int (*destroy_buffer)(struct s_graphics_pipeline* self, unsigned int buffer);
+	uint32_t (*create_buffer)(struct s_graphics_pipeline* self, void* data, uint64_t size, uint32_t type, uint32_t usage);
+	int (*destroy_buffer)(struct s_graphics_pipeline* self, uint32_t buffer);
 
-	void (*queue_program)(struct s_graphics_pipeline* self, unsigned char size);
-	unsigned int (*create_shader)(struct s_graphics_pipeline* self, const char* source, unsigned int type);
-	unsigned int (*finish_program)(struct s_graphics_pipeline* self, int flags);
-	int (*destroy_program)(struct s_graphics_pipeline* self, unsigned int program);
+	void (*queue_program)(struct s_graphics_pipeline* self, uint8_t size);
+	uint32_t (*create_shader)(struct s_graphics_pipeline* self, const char* source, uint32_t type);
+	uint32_t (*finish_program)(struct s_graphics_pipeline* self, uint32_t flags);
+	int (*destroy_program)(struct s_graphics_pipeline* self, uint32_t program);
 
-	unsigned int (*create_texture)(struct s_graphics_pipeline* self, unsigned int width, unsigned int height, unsigned char channels, unsigned char* pixels, int flags);
-	int (*destroy_texture)(struct s_graphics_pipeline* self, unsigned int texture);
+	uint32_t (*create_texture)(struct s_graphics_pipeline* self, uint32_t width, uint32_t height, uint8_t channels, uint8_t* pixels, uint32_t flags);
+	int (*destroy_texture)(struct s_graphics_pipeline* self, uint32_t texture);
 } graphics_pipeline_t;
 
 typedef struct s_graphics_drawable
 {
-	unsigned char header;
+	uint8_t header;
 
-	unsigned int ebo;
-	unsigned int vbo;
+	uint32_t ebo;
+	uint32_t vbo;
 
-	unsigned int vao;
+	uint32_t vao;
 
 	void* storage;
 
-	void (*draw)(struct s_graphics_drawable self, struct s_graphics_pipeline pipeline, unsigned int count);
+	void (*draw)(struct s_graphics_drawable self, struct s_graphics_pipeline pipeline, uint32_t count);
 } graphics_drawable_t;
 
 int graphics_create_pipeline(graphics_pipeline_t* pipeline, GladGLContext* context);

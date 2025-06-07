@@ -9,7 +9,7 @@
 
 #define F(X) (int)X+289
 
-extern unsigned char icon_raw[];
+extern uint8_t icon_raw[];
 
 struct
 {
@@ -21,6 +21,7 @@ struct
 static WindowAPICreate create(window_context_t window)
 {
 	GladGLContext* gl = window.context.context;
+	printf("GL: %p\n", gl);
 
 	gl->Viewport(0, 0, window.width, window.height);
 	gl->ClearColor(0.0625f, 0.075f, 0.1625f, 1.0f);
@@ -38,7 +39,7 @@ static WindowAPIDestroy destroy(window_context_t window)
 {
 }
 
-static WindowAPIResize resize(window_context_t window, int width, int height)
+static WindowAPIResize resize(window_context_t window, uint32_t width, uint32_t height)
 {
 	GladGLContext* gl = window.context.context;
 

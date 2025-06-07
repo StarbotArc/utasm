@@ -1,32 +1,32 @@
 #include "graphics.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdint.h>
 
 /*
  * The grand list of pipeline functions.
  */
 
-static unsigned int pipeline_create_buffer(struct s_graphics_pipeline* self, void* data, unsigned long size, int type, int usage);
-static int pipeline_destroy_buffer(struct s_graphics_pipeline* self, unsigned int buffer);
+static uint32_t pipeline_create_buffer(struct s_graphics_pipeline* self, void* data, uint64_t size, uint32_t type, uint32_t usage);
+static int pipeline_destroy_buffer(struct s_graphics_pipeline* self, uint32_t buffer);
 
-static void pipeline_queue_program(struct s_graphics_pipeline* self, unsigned char size);
-static unsigned int pipeline_create_shader(struct s_graphics_pipeline* self, const char* source, unsigned int type);
-static unsigned int pipeline_finish_program(struct s_graphics_pipeline* self, int flags);
-static int pipeline_destroy_program(struct s_graphics_pipeline* self, unsigned int program);
+static void pipeline_queue_program(struct s_graphics_pipeline* self, uint8_t size);
+static uint32_t pipeline_create_shader(struct s_graphics_pipeline* self, const char* source, uint32_t type);
+static uint32_t pipeline_finish_program(struct s_graphics_pipeline* self, uint32_t flags);
+static int pipeline_destroy_program(struct s_graphics_pipeline* self, uint32_t program);
 
-static unsigned int pipeline_create_texture(struct s_graphics_pipeline* self, unsigned int width, unsigned int height, unsigned char channels, unsigned char* pixels, int flags);
-static int pipeline_destroy_texture(struct s_graphics_pipeline* self, unsigned int texture);
+static uint32_t pipeline_create_texture(struct s_graphics_pipeline* self, uint32_t width, uint32_t height, uint8_t channels, uint8_t* pixels, uint32_t flags);
+static int pipeline_destroy_texture(struct s_graphics_pipeline* self, uint32_t texture);
 
 int graphics_create_pipeline(graphics_pipeline_t* pipeline, GladGLContext* context)
 {
-	//if (!vector_create(&pipeline->buffers, sizeof(unsigned int), 4)) return 1;
-	//if (!vector_create(&pipeline->vertex_arrays, sizeof(unsigned int), 4)) return 1;
-	//if (!vector_create(&pipeline->texture_cache, sizeof(unsigned int), 4)) return 1;
-	if (!vector_create(&pipeline->shader_queue, sizeof(unsigned int), 4)) return 1;
+	//if (vector_create(&pipeline->buffers, sizeof(uint32_t), 4)) return 1;
+	//if (vector_create(&pipeline->vertex_arrays, sizeof(uint32_t), 4)) return 1;
+	// //if (vector_create(&pipeline->texture_cache, sizeof(uint32_t), 4)) return 1;
+	//if (vector_create(&pipeline->shader_queue, sizeof(uint32_t), 4)) return 1;
 
 	pipeline->create_buffer = pipeline_create_buffer;
-	pipeline->destroy_buffer = pipeline_destroy_program;
+	pipeline->destroy_buffer = pipeline_destroy_buffer;
 
 	pipeline->queue_program = pipeline_queue_program;
 	pipeline->create_shader = pipeline_create_shader;
@@ -47,21 +47,21 @@ void graphics_destroy_pipeline(graphics_pipeline_t pipeline)
 
 	for (int i = 0; i < pipeline.buffers.size; i++)
 	{
-		unsigned int* buffer = pipeline.buffers.data[i];
-		if (!gl->IsBuffer(*buffer)) continue;
+		uint32_t buffer = pipeline.buffers.data[i];
+		if (!gl->IsBuffer(buffer)) continue;
 
-		gl->DeleteBuffers(1, buffer);
+		gl->DeleteBuffers(1, &buffer);
 	}
 	for (int i = 0; i < pipeline.vertex_arrays.size; i++)
 	{
-		unsigned int* vertex_array = pipeline.vertex_arrays.data[i];
-		if (!gl->IsVertexArray(*vertex_array)) continue;
+		uint32_t vertex_array = pipeline.vertex_arrays.data[i];
+		if (!gl->IsVertexArray(vertex_array)) continue;
 
-		gl->DeleteVertexArrays(1, vertex_array);
+		gl->DeleteVertexArrays(1, &vertex_array);
 	}
 }
 
-unsigned int pipeline_create_buffer(struct s_graphics_pipeline* self, void* data, unsigned long size, int type, int usage)
+uint32_t pipeline_create_buffer(struct s_graphics_pipeline* self, void* data, uint64_t size, uint32_t type, uint32_t usage)
 {
 	GladGLContext* gl = self->context;
 
@@ -74,7 +74,7 @@ unsigned int pipeline_create_buffer(struct s_graphics_pipeline* self, void* data
 
 	return buffer;
 }
-int pipeline_destroy_buffer(struct s_graphics_pipeline* self, unsigned int buffer)
+int pipeline_destroy_buffer(struct s_graphics_pipeline* self, uint32_t buffer)
 {
 	GladGLContext* gl = self->context;
 
@@ -82,13 +82,13 @@ int pipeline_destroy_buffer(struct s_graphics_pipeline* self, unsigned int buffe
 	return 0;
 }
 
-void pipeline_queue_program(struct s_graphics_pipeline* self, unsigned char size)
+void pipeline_queue_program(struct s_graphics_pipeline* self, uint8_t size)
 {
 	GladGLContext* gl = self->context;
 
 	self->program_queued = gl->CreateProgram();
 }
-unsigned int pipeline_create_shader(struct s_graphics_pipeline* self, const char* source, unsigned int type)
+unsigned int pipeline_create_shader(struct s_graphics_pipeline* self, const char* source, uint32_t type)
 {
 	GladGLContext* gl = self->context;
 
@@ -107,29 +107,29 @@ unsigned int pipeline_create_shader(struct s_graphics_pipeline* self, const char
 		return -1;
 	}
 
-	vector_add(&self->shader_queue, shader);
+	//vector_add(&self->shader_queue, shader);
 	return shader[0];
 }
-unsigned int pipeline_finish_program(struct s_graphics_pipeline* self, int flags)
+unsigned int pipeline_finish_program(struct s_graphics_pipeline* self, uint32_t flags)
 {
 	GladGLContext* gl = self->context;
 
-	unsigned int program = self->program_queued;
+	uint32_t program = self->program_queued;
 
 	for (int i = 0; i < self->shader_queue.size; i++)
 	{
-		unsigned int* shader = self->shader_queue.data[i];
-		if (!gl->IsShader(*shader)) continue;
+		uint32_t shader = self->shader_queue.data[i];
+		if (!gl->IsShader(shader)) continue;
 
-		gl->AttachShader(program, *shader);
+		gl->AttachShader(program, shader);
 
-		shader[0] = -1;
+		self->shader_queue.data[i] = -1;
 	}
 	gl->LinkProgram(program);
 
 	return program;
 }
-int pipeline_destroy_program(struct s_graphics_pipeline* self, unsigned int program)
+int pipeline_destroy_program(struct s_graphics_pipeline* self, uint32_t program)
 {
 	GladGLContext* gl = self->context;
 
@@ -137,11 +137,11 @@ int pipeline_destroy_program(struct s_graphics_pipeline* self, unsigned int prog
 	return 0;
 }
 
-unsigned int pipeline_create_texture(struct s_graphics_pipeline* self, unsigned int width, unsigned int height, unsigned char channels, unsigned char* pixels, int flags)
+uint32_t pipeline_create_texture(struct s_graphics_pipeline* self, uint32_t width, uint32_t height, uint8_t channels, uint8_t* pixels, uint32_t flags)
 {
 	return 0;
 }
-int pipeline_destroy_texture(struct s_graphics_pipeline* self, unsigned int texture)
+int pipeline_destroy_texture(struct s_graphics_pipeline* self, uint32_t texture)
 {
 	return 0;
 }

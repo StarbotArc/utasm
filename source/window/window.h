@@ -21,8 +21,8 @@ typedef struct
 {
 	graphics_pipeline_t context;
 
-	int width;
-	int height;
+	uint32_t width;
+	uint32_t height;
 } window_context_t;
 
 typedef int (*WindowAPICreateCallback)(window_context_t);
@@ -30,7 +30,7 @@ typedef void (*WindowAPIDestroyCallback)(window_context_t);
 
 typedef void (*WindowAPILoopCallback)(window_context_t);
 
-typedef void (*WindowAPIResizeCallback)(window_context_t, int, int);
+typedef void (*WindowAPIResizeCallback)(window_context_t, uint32_t, uint32_t);
 
 typedef void (*WindowAPIMouseMoveCallback)(double, double);
 typedef void (*WindowAPIMousePressCallback)(int, int, int);
@@ -41,10 +41,10 @@ typedef void (*WindowAPIKeyTypeCallback)(int);
 
 typedef struct
 {
-	unsigned int width;
-	unsigned int height;
+	uint32_t width;
+	uint32_t height;
 
-	unsigned char* data;
+	uint8_t* data;
 } window_icon_t;
 
 typedef struct
@@ -69,7 +69,7 @@ typedef struct
 int window_library_init();
 void window_library_destroy();
 
-window_t* window_create(const char* title, int width, int height);
+window_t* window_create(const char* title, uint32_t width, uint32_t height);
 void window_run(window_t* window);
 void window_destroy(window_t* window);
 

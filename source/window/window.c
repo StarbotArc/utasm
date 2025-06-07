@@ -22,7 +22,7 @@ static WindowAPIDestroy pl_destroy(window_context_t context) {}
 
 static WindowAPILoop pl_loop(window_context_t context) {}
 
-static WindowAPIResize pl_resize(window_context_t context, int width, int height) {}
+static WindowAPIResize pl_resize(window_context_t context, uint32_t width, uint32_t height) {}
 
 static WindowAPIMouseMove pl_mouse_move(double x, double y) {}
 static WindowAPIMousePress pl_mouse_press(int button, int action, int mod) {}
@@ -102,7 +102,7 @@ void window_library_destroy()
 	glfwTerminate();
 }
 
-window_t* window_create(const char* title, int width, int height)
+window_t* window_create(const char* title, uint32_t width, uint32_t height)
 {
 	window_t* native_window = malloc(sizeof *native_window);
 
@@ -152,8 +152,11 @@ window_t* window_create(const char* title, int width, int height)
 	printf("Created OpenGL %d.%d instance.\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 	fflush(stdout);
 
-
-	graphics_create_pipeline(&native_window->context.context, context);
+	if (graphics_create_pipeline(&native_window->context.context, context))
+	{
+		printf("[Error]: Graphics pipeline failed to create.\n");
+		return NULL;
+	}
 
 	glfwSwapInterval(1);
 
@@ -167,12 +170,9 @@ window_t* window_create(const char* title, int width, int height)
 void window_run(window_t* window)
 {
 	GLFWwindow* glfw_window = find_glfw_window_with_native_window(window);
-	printf("GLFW window address: %p\n", glfw_window);
 
-	puts("Window CREATE");
 	if (window->create_callback(window->context)) return;
 
-	puts("Window CALLBACK");
 	glfwSetFramebufferSizeCallback(glfw_window, resize);
 
 	glfwSetCursorPosCallback(glfw_window, mouse_move);
@@ -182,7 +182,6 @@ void window_run(window_t* window)
 	glfwSetKeyCallback(glfw_window, key_press);
 	glfwSetCharCallback(glfw_window, key_type);
 
-	puts("Window INIT");
 	while (!glfwWindowShouldClose(glfw_window))
 	{
 		window->loop_callback(window->context);

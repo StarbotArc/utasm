@@ -1,6 +1,8 @@
 #ifndef __UTASM_SIMFILE_SIMFILE_H__
 #define __UTASM_SIMFILE_SIMFILE_H__
 
+#include <stdint.h>
+
 #define list simfile_list_t
 
 typedef struct
@@ -16,19 +18,19 @@ typedef struct
 typedef union
 {
 	simfile_event_t event;
-	unsigned int notedata;
+	uint32_t notedata;
 } simfile_item_t;
 
 typedef struct
 {
-	unsigned long size;
+	uint64_t size;
 	simfile_item_t* items;
 } simfile_list_t;
 
 typedef struct
 {
-	unsigned char size;
-	short data;
+	uint8_t size;
+	uint16_t data;
 } simfile_row_t;
 
 typedef struct
@@ -41,7 +43,7 @@ typedef struct
 	list bpms;
 	list stops;
 
-	unsigned char key_count;
+	uint8_t key_count;
 	list rows;
 } simfile_t;
 

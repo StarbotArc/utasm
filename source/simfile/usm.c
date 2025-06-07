@@ -22,7 +22,6 @@ styles[10] =
 
 	{ .name="pump-couple", .keys=10 },
 	{ .name="pump-double", .keys=10 },
-
 };
 
 static int legal(char c) {
@@ -68,7 +67,7 @@ void _usm_export(simfile_t* simfile, FILE* file)
 	char buffer[33];
 	for (int i = 0; i < simfile->rows.size; i++)
 	{
-		unsigned int notedata = simfile->rows.items[i].notedata;
+		uint32_t notedata = simfile->rows.items[i].notedata;
 		buffer[simfile->key_count] = 0;
 
 		int pos = 0;
