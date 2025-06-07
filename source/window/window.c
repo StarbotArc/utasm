@@ -17,12 +17,12 @@ static unsigned int instance_alloc;
 
 /* Placeholder events */
 
-static WindowAPICreate pl_create(window_context_t context) { return 0; }
-static WindowAPIDestroy pl_destroy(window_context_t context) {}
+static WindowAPICreate pl_create(window_context_t* context) { return 0; }
+static WindowAPIDestroy pl_destroy(window_context_t* context) {}
 
-static WindowAPILoop pl_loop(window_context_t context) {}
+static WindowAPILoop pl_loop(window_context_t* context) {}
 
-static WindowAPIResize pl_resize(window_context_t context, unsigned int width, unsigned int height) {}
+static WindowAPIResize pl_resize(window_context_t* context, int width, int height) {}
 
 static WindowAPIMouseMove pl_mouse_move(double x, double y) {}
 static WindowAPIMousePress pl_mouse_press(int button, int action, int mod) {}
@@ -62,7 +62,7 @@ static window_t* find_native_window_with_glfw_window(GLFWwindow* ptr)
 static void resize(GLFWwindow* window, int width, int height)
 {
 	window_t* native_window = find_native_window_with_glfw_window(window);
-	native_window->resize_callback(native_window->context, width, height);
+	native_window->resize_callback(&native_window->context, width, height);
 	native_window->context.width = width;
 	native_window->context.height = height;
 }
@@ -152,7 +152,8 @@ window_t* window_create(const char* title, int width, int height)
 	printf("Created OpenGL %d.%d instance.\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 	fflush(stdout);
 
-	native_window->context.context = context;
+
+	graphics_create_pipeline(&native_window->context->context, context);
 
 	glfwSwapInterval(1);
 
@@ -166,9 +167,12 @@ window_t* window_create(const char* title, int width, int height)
 void window_run(window_t* window)
 {
 	GLFWwindow* glfw_window = find_glfw_window_with_native_window(window);
+	printf("GLFW window address: %p\n", glfw_window);
 
+	puts("Window CREATE");
 	if (window->create_callback(window->context)) return;
 
+	puts("Window CALLBACK");
 	glfwSetFramebufferSizeCallback(glfw_window, resize);
 
 	glfwSetCursorPosCallback(glfw_window, mouse_move);
@@ -178,6 +182,7 @@ void window_run(window_t* window)
 	glfwSetKeyCallback(glfw_window, key_press);
 	glfwSetCharCallback(glfw_window, key_type);
 
+	puts("Window INIT");
 	while (!glfwWindowShouldClose(glfw_window))
 	{
 		window->loop_callback(window->context);
@@ -192,7 +197,7 @@ void window_destroy(window_t* window)
 {
 	GLFWwindow* glfw_window = find_glfw_window_with_native_window(window);
 
-	free(window->context.context);
+	graphics_destroy_pipeline(window->context->context);
 
 	glfwDestroyWindow(glfw_window);
 	free(window);
@@ -249,4 +254,9 @@ void window_set_key_press_callback(window_t* window, WindowAPIKeyPressCallback c
 void window_set_key_type_callback(window_t* window, WindowAPIKeyTypeCallback callback)
 {
 	window->key_type_callback = callback;
+}
+
+double window_clock()
+{
+	return glfwGetTime();
 }

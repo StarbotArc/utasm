@@ -23,7 +23,7 @@ typedef struct s_graphics_pipeline
 	unsigned int program_queued;
 	vector_t shader_queue;
 
-	unsigned int (*create_buffer)(struct s_graphics_pipeline* self, void* data, unsigned long size, int type);
+	unsigned int (*create_buffer)(struct s_graphics_pipeline* self, void* data, unsigned long size, int type, int usage);
 	int (*destroy_buffer)(struct s_graphics_pipeline* self, unsigned int buffer);
 
 	void (*queue_program)(struct s_graphics_pipeline* self, unsigned char size);

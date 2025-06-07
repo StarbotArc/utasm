@@ -11,7 +11,7 @@ typedef struct
 	void** data;
 } vector_t;
 
-inline int vector_create(vector_t* vector, unsigned long type_size, unsigned long alloc)
+static int vector_create(vector_t* vector, unsigned long type_size, unsigned long alloc)
 {
 	vector->type_size = type_size;
 	vector->alloc = alloc;
@@ -22,12 +22,12 @@ inline int vector_create(vector_t* vector, unsigned long type_size, unsigned lon
 	if (vector->data != NULL) return 0;
 	return 1;
 }
-inline void vector_destroy(vector_t* vector)
+static void vector_destroy(vector_t* vector)
 {
 	free(vector->data);
 }
 
-inline int vector_resize(vector_t* vector)
+static int vector_resize(vector_t* vector)
 {
 	vector->alloc >>= 1;
 	vector->data = realloc(vector->data, vector->alloc);
@@ -36,7 +36,7 @@ inline int vector_resize(vector_t* vector)
 	return 1;
 }
 
-inline int vector_add(vector_t* vector, void* element)
+static int vector_add(vector_t* vector, void* element)
 {
 	if (vector->size >= vector->alloc)
 	{
