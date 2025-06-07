@@ -1,6 +1,20 @@
 include ../vars.mk
 
-build: simfile/*.c window/*.c
+build: graphics/*.c simfile/*.c window/*.c
+	$(MAKE) -C graphics build
+
+	$(CC) -g -c graphics/graphics.c -o ../binary/build/graphics.o -I./
+
+	$(CC) -g -c scene/scene.c -o ../binary/build/scene.o -I./
+
+	$(CC) -g -c simfile/simfile.c -o ../binary/build/simfile.o -I./
+	$(CC) -g -c simfile/sm.c -o ../binary/build/simfile_sm.o -I./
+	$(CC) -g -c simfile/ssc.c -o ../binary/build/simfile_ssc.o -I./
+	$(CC) -g -c simfile/usm.c -o ../binary/build/simfile_usm.o -I./
+
+	$(CC) -g -c window/*.c -o ../binary/build/window.o -I./
+
+build-release: graphics/*.c simfile/*.c window/*.c
 	$(MAKE) -C graphics build
 
 	$(CC) -c graphics/graphics.c -o ../binary/build/graphics.o -I./

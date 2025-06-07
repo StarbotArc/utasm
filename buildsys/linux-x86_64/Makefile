@@ -12,7 +12,7 @@ build: setup clean
 	$(MAKE) -C source build
 	$(CC) $(FLAGS) source/*.c -o binary/build/utasm binary/build/*.o $(INCLUDES) $(LIBRARIES)
 build-release: setup clean
-	$(MAKE) -C source build
+	$(MAKE) -C source build-release
 	$(CC) $(RELEASE_FLAGS) source/*.c -o binary/build/utasm-release binary/build/*.o $(INCLUDES) $(LIBRARIES)
 	cp binary/build/utasm-release binary/release/utasm
 

@@ -17,12 +17,12 @@ static unsigned int instance_alloc;
 
 /* Placeholder events */
 
-static WindowAPICreate pl_create(window_context_t* context) { return 0; }
-static WindowAPIDestroy pl_destroy(window_context_t* context) {}
+static WindowAPICreate pl_create(window_context_t context) { return 0; }
+static WindowAPIDestroy pl_destroy(window_context_t context) {}
 
-static WindowAPILoop pl_loop(window_context_t* context) {}
+static WindowAPILoop pl_loop(window_context_t context) {}
 
-static WindowAPIResize pl_resize(window_context_t* context, int width, int height) {}
+static WindowAPIResize pl_resize(window_context_t context, int width, int height) {}
 
 static WindowAPIMouseMove pl_mouse_move(double x, double y) {}
 static WindowAPIMousePress pl_mouse_press(int button, int action, int mod) {}
@@ -62,7 +62,7 @@ static window_t* find_native_window_with_glfw_window(GLFWwindow* ptr)
 static void resize(GLFWwindow* window, int width, int height)
 {
 	window_t* native_window = find_native_window_with_glfw_window(window);
-	native_window->resize_callback(&native_window->context, width, height);
+	native_window->resize_callback(native_window->context, width, height);
 	native_window->context.width = width;
 	native_window->context.height = height;
 }
@@ -153,7 +153,7 @@ window_t* window_create(const char* title, int width, int height)
 	fflush(stdout);
 
 
-	graphics_create_pipeline(&native_window->context->context, context);
+	graphics_create_pipeline(&native_window->context.context, context);
 
 	glfwSwapInterval(1);
 
@@ -197,7 +197,7 @@ void window_destroy(window_t* window)
 {
 	GLFWwindow* glfw_window = find_glfw_window_with_native_window(window);
 
-	graphics_destroy_pipeline(window->context->context);
+	graphics_destroy_pipeline(window->context.context);
 
 	glfwDestroyWindow(glfw_window);
 	free(window);

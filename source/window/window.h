@@ -25,12 +25,12 @@ typedef struct
 	int height;
 } window_context_t;
 
-typedef int (*WindowAPICreateCallback)(window_context_t*);
-typedef void (*WindowAPIDestroyCallback)(window_context_t*);
+typedef int (*WindowAPICreateCallback)(window_context_t);
+typedef void (*WindowAPIDestroyCallback)(window_context_t);
 
-typedef void (*WindowAPILoopCallback)(window_context_t*);
+typedef void (*WindowAPILoopCallback)(window_context_t);
 
-typedef void (*WindowAPIResizeCallback)(window_context_t*, int, int);
+typedef void (*WindowAPIResizeCallback)(window_context_t, int, int);
 
 typedef void (*WindowAPIMouseMoveCallback)(double, double);
 typedef void (*WindowAPIMousePressCallback)(int, int, int);
@@ -49,7 +49,7 @@ typedef struct
 
 typedef struct
 {
-	window_context_t* context;
+	window_context_t context;
 
 	WindowAPICreateCallback create_callback;
 	WindowAPIDestroyCallback destroy_callback;

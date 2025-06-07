@@ -36,6 +36,8 @@ int graphics_create_pipeline(graphics_pipeline_t* pipeline, GladGLContext* conte
 	pipeline->create_texture = pipeline_create_texture;
 	pipeline->destroy_texture = pipeline_destroy_texture;
 
+	pipeline->context = context;
+
 	return 0;
 }
 
