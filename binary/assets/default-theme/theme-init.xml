@@ -1,0 +1,13 @@
+<!-- theme-init.xml -->
+<!-- The main file for creating themes. -->
+
+<theme>
+    <name>utada</name>
+    <author>sjplus &amp; contributers</author>
+    <version>v0.0</version>
+
+    <screens starts-with="screen-startup">
+        <screen src="screen-startup.xml">screen-startup</screen>
+        <screen>screen-editor</screen>
+    </screens>
+</theme>

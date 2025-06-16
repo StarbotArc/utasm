@@ -1,0 +1,5 @@
+<screen definition="screen-startup">
+	<quad parent-anchor="center" x="0" y="0" w="200" h="200">
+		<button parent-anchor="center-left" w="100"> button </button>
+	</quad>
+<screen>
