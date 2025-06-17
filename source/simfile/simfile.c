@@ -25,15 +25,15 @@ simfile_t* simfile_create()
 	simfile->artist = "parmesan";
 	simfile->author = "romano";
 
-	simfile->key_count = 4;
+	simfile->charts = malloc(sizeof *simfile->charts);
+	simfile_chart_t* chart = simfile->charts;
 
-	simfile->rows.size = 4;
-	simfile->rows.items = malloc(sizeof(simfile_item_t) * 4);
+	vector_new(chart->rows, 4);
 
 	for (int i = 0; i < 4; i++)
 	{
-		simfile->rows.items[i].notedata = 1 << i;
-		printf("%d\n", simfile->rows.items[i].notedata);
+		chart->rows.data[i] = 1 << i;
+		printf("%d\n", chart->rows.data[i]);
 	}
 
 	return simfile;
@@ -64,11 +64,12 @@ void simfile_export(simfile_t* simfile, char* path)
 
 void simfile_destroy(simfile_t* simfile)
 {
-	free(simfile->rows.items);
+	//free(simfile->rows.items);
 	free(simfile);
 }
 
-void simfile_add_event(simfile_t* file, const char* event, simfile_event_t value)
+void simfile_add_event(simfile_chart_t* file, simfile_event_type_t type, simfile_event_generic_t event)
 {
+
 }
 

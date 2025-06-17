@@ -1,11 +1,11 @@
 include ../vars.mk
 
-build: graphics/*.c simfile/*.c window/*.c
+build: editor/*.c graphics/*.c simfile/*.c window/*.c
 	$(MAKE) -C graphics build
 
-	$(CC) -g -c graphics/graphics.c -o ../binary/build/graphics.o -I./
+	$(CC) -g -c editor/editor.c -o ../binary/build/editor.o -I./
 
-	$(CC) -g -c scene/scene.c -o ../binary/build/scene.o -I./
+	$(CC) -g -c graphics/graphics.c -o ../binary/build/graphics.o -I./
 
 	$(CC) -g -c simfile/simfile.c -o ../binary/build/simfile.o -I./
 	$(CC) -g -c simfile/sm.c -o ../binary/build/simfile_sm.o -I./
@@ -14,12 +14,12 @@ build: graphics/*.c simfile/*.c window/*.c
 
 	$(CC) -g -c window/*.c -o ../binary/build/window.o -I./
 
-build-release: graphics/*.c simfile/*.c window/*.c
+build-release: editor/*.c graphics/*.c simfile/*.c window/*.c
 	$(MAKE) -C graphics build
 
-	$(CC) -c graphics/graphics.c -o ../binary/build/graphics.o -I./
+	$(CC) -c editor/editor.c -o ../binary/build/editor.o -I./
 
-	$(CC) -c scene/scene.c -o ../binary/build/scene.o -I./
+	$(CC) -c graphics/graphics.c -o ../binary/build/graphics.o -I./
 
 	$(CC) -c simfile/simfile.c -o ../binary/build/simfile.o -I./
 	$(CC) -c simfile/sm.c -o ../binary/build/simfile_sm.o -I./

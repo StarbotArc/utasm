@@ -5,7 +5,7 @@
 #include "window/window.h"
 #include "simfile/simfile.h"
 
-#include "scene/scene.h"
+#include "editor/editor.h"
 
 #define F(X) (int)X+289
 
@@ -14,8 +14,6 @@ extern uint8_t icon_raw[];
 struct
 {
 	double last_clock;
-
-	scene_t scene;
 } enviroment;
 
 static WindowAPICreate create(window_context_t window)
@@ -26,17 +24,23 @@ static WindowAPICreate create(window_context_t window)
 	gl->Viewport(0, 0, window.width, window.height);
 	gl->ClearColor(0.0625f, 0.075f, 0.1625f, 1.0f);
 
+	editor_create(&window.context, window.width, window.height);
+
 	return 0;
 }
 static WindowAPILoop loop(window_context_t window)
 {
-	double now = window_clock() - enviroment.last_clock;
-	scene_update(enviroment.scene, now);
+	GladGLContext* gl = window.context.context;
+	gl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	editor_draw(&window.context);
+
+	double now = window_clock() - enviroment.last_clock;
 	enviroment.last_clock = now;
 }
 static WindowAPIDestroy destroy(window_context_t window)
 {
+	editor_destroy(&window.context);
 }
 
 static WindowAPIResize resize(window_context_t window, uint32_t width, uint32_t height)
@@ -62,6 +66,7 @@ static WindowAPIKeyPress key_press(int button, int actions, int mods)
 	switch (button)
 	{
 		case F(12):
+			puts("F12");
 			break;
 	}
 }
@@ -79,7 +84,7 @@ int main()
 
 	if (window_library_init()) return 1;
 
-	window_t* window_1 = window_create("UtaSM", 900, 900);
+	window_t* window_1 = window_create("UtaSM", 720, 720);
 	window_icon_t icon = { .width=128, .height=128, .data=icon_raw };
 
 	window_set_icon(window_1, &icon);

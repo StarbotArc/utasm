@@ -3,6 +3,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef enum
+{
+	TYPE_NONE,
+
+	TYPE_INTEGER,
+	TYPE_FLOAT,
+
+	TYPE_STRING,
+
+	TYPE_NODE
+} _umeta_type;
+
+typedef struct struct_umeta_node {
+	_umeta_type type;
+	union {
+		int i;
+		float f;
+		char* s;
+		struct struct_umeta_node* node;
+	} value;
+	char* name;
+} _umeta_node;
+
 struct { char name[32]; unsigned char keys; }
 styles[10] =
 {
@@ -23,6 +46,15 @@ styles[10] =
 	{ .name="pump-couple", .keys=10 },
 	{ .name="pump-double", .keys=10 },
 };
+char difficulties[][8] =
+{
+	"bg",
+	"ez",
+	"nm",
+	"hd",
+	"in",
+	"ed"
+};
 
 static int legal(char c) {
 	return	c >= 'A' || c <= 'Z' ||
@@ -41,6 +73,7 @@ simfile_t* _usm_load(FILE* file)
 	};
 	struct state
 	{
+
 	};
 
 	char buffer[256];

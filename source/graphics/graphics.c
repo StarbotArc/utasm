@@ -30,10 +30,10 @@ int graphics_create_pipeline(graphics_pipeline_t* pipeline, GladGLContext* conte
 	vector_new(pipeline->texture_cache, 4);
 	vector_new(pipeline->shader_queue, 4);
 
-	//if (vector_create(&pipeline->buffers, sizeof(uint32_t), 4)) return 1;
-	//if (vector_create(&pipeline->vertex_arrays, sizeof(uint32_t), 4)) return 1;
-	//if (vector_create(&pipeline->texture_cache, sizeof(uint32_t), 4)) return 1;
-	//if (vector_create(&pipeline->shader_queue, sizeof(uint32_t), 4)) return 1;
+	if (!vector_allocated(pipeline->buffers)) return 1;
+	if (!vector_allocated(pipeline->vertex_arrays)) return 1;
+	if (!vector_allocated(pipeline->texture_cache)) return 1;
+	if (!vector_allocated(pipeline->shader_queue)) return 1;
 
 	pipeline->create_buffer = pipeline_create_buffer;
 	pipeline->destroy_buffer = pipeline_destroy_buffer;
@@ -47,6 +47,8 @@ int graphics_create_pipeline(graphics_pipeline_t* pipeline, GladGLContext* conte
 	pipeline->destroy_texture = pipeline_destroy_texture;
 
 	pipeline->context = context;
+
+	pipeline->program_queued = -1;
 
 	return 0;
 }
@@ -90,9 +92,8 @@ uint32_t pipeline_create_buffer(struct s_graphics_pipeline* self, void* data, ui
 	unsigned int buffer;
 	gl->GenBuffers(1, &buffer);
 
-	gl->BindBuffer(GL_ARRAY_BUFFER, buffer);
-	gl->BufferData(GL_ARRAY_BUFFER, size, data, usage);
-	gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+	gl->BindBuffer(type, buffer);
+	gl->BufferData(type, size, data, usage);
 
 	return buffer;
 }
@@ -106,6 +107,8 @@ int pipeline_destroy_buffer(struct s_graphics_pipeline* self, uint32_t buffer)
 
 void pipeline_queue_program(struct s_graphics_pipeline* self, uint8_t size)
 {
+	if (self->program_queued != -1) return;
+
 	GladGLContext* gl = self->context;
 
 	self->program_queued = gl->CreateProgram();
@@ -123,8 +126,9 @@ unsigned int pipeline_create_shader(struct s_graphics_pipeline* self, const char
 	int success;
 
 	gl->GetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	if (success)
+	if (!success)
 	{
+		gl->GetShaderInfoLog(shader, 512, NULL, buffer);
 		printf("[Shader]: %s\n", buffer);
 		return -1;
 	}
@@ -141,13 +145,28 @@ unsigned int pipeline_finish_program(struct s_graphics_pipeline* self, uint32_t 
 	for (int i = 0; i < self->shader_queue.size; i++)
 	{
 		uint32_t shader = self->shader_queue.data[i];
+
 		if (!gl->IsShader(shader)) continue;
+		printf("Passed Shader: %d\n", shader);
 
 		gl->AttachShader(program, shader);
 
 		self->shader_queue.data[i] = -1;
 	}
 	gl->LinkProgram(program);
+
+	char buffer[512];
+	int success;
+
+	gl->GetProgramiv(program, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		gl->GetProgramInfoLog(program, 512, NULL, buffer);
+		printf("[Program]: %s\n", buffer);
+		return -1;
+	}
+
+	self->program_queued = -1;
 
 	return program;
 }

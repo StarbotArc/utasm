@@ -25,10 +25,10 @@ static WindowAPILoop pl_loop(window_context_t context) {}
 static WindowAPIResize pl_resize(window_context_t context, uint32_t width, uint32_t height) {}
 
 static WindowAPIMouseMove pl_mouse_move(double x, double y) {}
-static WindowAPIMousePress pl_mouse_press(int button, int action, int mod) {}
+static WindowAPIMousePress pl_mouse_press(int button, int pressed, int mod) {}
 static WindowAPIMouseScroll pl_mouse_scroll(double x, double y) {}
 
-static WindowAPIKeyPress pl_key_press(int button, int action, int mod) {}
+static WindowAPIKeyPress pl_key_press(int button, int pressed, int mod) {}
 static WindowAPIKeyType pl_key_type(int keycode) {}
 
 /* Utilities functions */
@@ -82,7 +82,7 @@ static void mouse_scroll(GLFWwindow* window, double x, double y)
 
 static void key_press(GLFWwindow* window, int button, int scancode, int actions, int mods)
 {
-	find_native_window_with_glfw_window(window)->key_press_callback(button, actions, mods);
+	find_native_window_with_glfw_window(window)->key_press_callback(button, actions != GLFW_RELEASE, mods);
 }
 static void key_type(GLFWwindow* window, unsigned int codepoint)
 {
@@ -154,7 +154,7 @@ window_t* window_create(const char* title, uint32_t width, uint32_t height)
 
 	if (graphics_create_pipeline(&native_window->context.context, context))
 	{
-		printf("[Error]: Graphics pipeline failed to create.\n");
+		puts("[Error]: Graphics pipeline failed to create.");
 		return NULL;
 	}
 

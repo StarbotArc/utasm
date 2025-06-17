@@ -1,31 +1,46 @@
 #ifndef __UTASM_SIMFILE_SIMFILE_H__
 #define __UTASM_SIMFILE_SIMFILE_H__
 
-#include <stdint.h>
+#include <util/vector.h>
 
-#define list simfile_list_t
+/*
+ * Meta-structure template macro functions for utility purposes.
+ * Do not let these macro functions go outside the scope of this file.
+ */
 
-typedef struct
+#define event(X, ...) typedef struct { \
+	__VA_ARGS__ \
+} simfile_##X##_event_t;
+
+#define parameter(T, X) T X;
+
+event(bpm, parameter(float, value))
+event(stop, parameter(float, value))
+
+#undef event
+#undef parameter
+
+typedef enum
 {
-	float beat; 
-	union
-	{
-		float f;
-		const char* str;
-	} value;
-} simfile_event_t;
+	EVENT_BPM,
+	EVENT_STOP,
+} simfile_event_type_t;
+
+typedef enum
+{
+	DIFF_BEGINNER,
+	DIFF_EASY,
+	DIFF_MEDIUM,
+	DIFF_HARD,
+	DIFF_CHALLENGE,
+	DIFF_EDIT,
+} simfile_difficulty_t;
 
 typedef union
 {
-	simfile_event_t event;
-	uint32_t notedata;
-} simfile_item_t;
-
-typedef struct
-{
-	uint64_t size;
-	simfile_item_t* items;
-} simfile_list_t;
+	simfile_bpm_event_t bpm;
+	simfile_stop_event_t stop;
+} simfile_event_generic_t;
 
 typedef struct
 {
@@ -35,19 +50,26 @@ typedef struct
 
 typedef struct
 {
+	uint8_t key_count;
+
+	int32_t meter;
+	simfile_difficulty_t difficulty;
+
+	vector(simfile_bpm_event_t) bpms;
+	vector(simfile_stop_event_t) stops;
+
+	vector(uint32_t) rows;
+} simfile_chart_t;
+
+typedef struct
+{
 	char* name;
 	char* subtitle;
 	char* artist;
 	char* author;
 
-	list bpms;
-	list stops;
-
-	uint8_t key_count;
-	list rows;
+	simfile_chart_t* charts;
 } simfile_t;
-
-#undef list
 
 simfile_t* simfile_create();
 simfile_t* simfile_load(char* path);
@@ -56,6 +78,6 @@ void simfile_export(simfile_t* simfile, char* path);
 
 void simfile_destroy(simfile_t* simfile);
 
-void simfile_add_event(simfile_t* file, const char* event, simfile_event_t value);
+void simfile_add_event(simfile_chart_t* file, simfile_event_type_t type, simfile_event_generic_t event);
 
 #endif//__UTASM_SIMFILE_SIMFILE_H__
