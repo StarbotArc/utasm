@@ -28,11 +28,14 @@ simfile_t* simfile_create()
 	simfile->charts = malloc(sizeof *simfile->charts);
 	simfile_chart_t* chart = simfile->charts;
 
+	chart->key_count = 4;
+
+	vector_init(chart->rows);
 	vector_new(chart->rows, 4);
 
 	for (int i = 0; i < 4; i++)
 	{
-		chart->rows.data[i] = 1 << i;
+		vector_push(chart->rows, 1 << i);
 		printf("%d\n", chart->rows.data[i]);
 	}
 
@@ -52,19 +55,20 @@ void simfile_export(simfile_t* simfile, char* path)
 {
 	FILE* file = fopen(path, "w");
 
-	const char* as = path + strlen(path);
-	for (int i = strlen(path); *(as - 1) != '.'; i--) as--;
+	// const char* as = path + strlen(path);
+	// for (int i = strlen(path); *(as - 1) != '.'; i--) as--;
 
-	SIMFILE_EXPORT_IF(as, sm)(simfile, file);
-	SIMFILE_EXPORT_IF(as, ssc)(simfile, file);
-	SIMFILE_EXPORT_IF(as, usm)(simfile, file);
+	// SIMFILE_EXPORT_IF(as, sm)(simfile, file);
+	// SIMFILE_EXPORT_IF(as, ssc)(simfile, file);
+	SIMFILE_EXPORT_IF("usm", usm)(simfile, file);
 
 	fclose(file);
 }
 
 void simfile_destroy(simfile_t* simfile)
 {
-	//free(simfile->rows.items);
+	vector_delete(simfile->charts->rows);
+	free(simfile->charts);
 	free(simfile);
 }
 

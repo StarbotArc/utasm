@@ -97,14 +97,16 @@ void _usm_export(simfile_t* simfile, FILE* file)
 	fprintf(file, header, simfile->name, simfile->subtitle, simfile->artist, simfile->author);
 	fprintf(file, "chart:\n\ttype:\"%s\";\n\tnotedata:\n", "dance-single");
 
+	simfile_chart_t* chart = simfile->charts;
+
 	char buffer[33];
-	for (int i = 0; i < simfile->rows.size; i++)
+	for (int i = 0; i < chart->rows.size; i++)
 	{
-		uint32_t notedata = simfile->rows.items[i].notedata;
-		buffer[simfile->key_count] = 0;
+		uint32_t notedata = chart->rows.data[i];
+		buffer[chart->key_count] = 0;
 
 		int pos = 0;
-		while (pos < simfile->key_count)
+		while (pos < chart->key_count)
 		{
 			buffer[pos] = '0' + ((notedata >> pos) & 1);
 			pos++;

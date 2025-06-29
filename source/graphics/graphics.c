@@ -20,10 +20,10 @@ static int pipeline_destroy_texture(struct s_graphics_pipeline* self, uint32_t t
 
 int graphics_create_pipeline(graphics_pipeline_t* pipeline, GladGLContext* context)
 {
-	pipeline->buffers.alloc = 0;
-	pipeline->vertex_arrays.alloc = 0;
-	pipeline->texture_cache.alloc = 0;
-	pipeline->shader_queue.alloc = 0;
+	vector_init(pipeline->buffers);
+	vector_init(pipeline->vertex_arrays);
+	vector_init(pipeline->texture_cache);
+	vector_init(pipeline->shader_queue);
 
 	vector_new(pipeline->buffers, 4);
 	vector_new(pipeline->vertex_arrays, 4);

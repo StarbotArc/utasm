@@ -80,6 +80,7 @@ int main()
 
 	simfile_t* simfile = simfile_create();
 	simfile_export(simfile, "file.usm");
+
 	simfile_destroy(simfile);
 
 	if (window_library_init()) return 1;
