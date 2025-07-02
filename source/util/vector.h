@@ -90,4 +90,7 @@
 									variable.size = 0; \
 								} while (0)
 
+typedef vector(int32_t) vec_int32_t;
+typedef vector(uint32_t) vec_uint32_t;
+
 #endif//__UTASM_UTIL_VECTOR_H__

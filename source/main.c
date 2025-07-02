@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "window/window.h"
-#include "simfile/simfile.h"
+#include <window/window.h>
+#include <simfile/simfile.h>
 
-#include "editor/editor.h"
+#include <editor/editor.h>
+
+#include <util/bitfield.h>
 
 #define F(X) (int)X+289
 
@@ -76,9 +78,12 @@ static WindowAPIKeyPress key_press(int button, int actions, int mods)
 
 int main()
 {
+	bitfield_t bitf;
+	bitfield_set(bitf, 0b1101001, 28);
+
 	puts("Hello world!");
 
-	simfile_t* simfile = simfile_create();
+	/*simfile_t* simfile = simfile_create();
 	simfile_export(simfile, "file.usm");
 
 	simfile_destroy(simfile);
@@ -102,7 +107,7 @@ int main()
 
 	window_destroy(window_1);
 
-	window_library_destroy();
+	window_library_destroy();*/
 
 	return 0;
 }

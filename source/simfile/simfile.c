@@ -28,6 +28,10 @@ simfile_t* simfile_create()
 	simfile->charts = malloc(sizeof *simfile->charts);
 	simfile_chart_t* chart = simfile->charts;
 
+	chart->style = string_to_style("dance");
+	chart->difficulty = string_to_difficulty("easy");
+	chart->meter = 0;
+
 	chart->key_count = 4;
 
 	vector_init(chart->rows);
@@ -72,7 +76,7 @@ void simfile_destroy(simfile_t* simfile)
 	free(simfile);
 }
 
-void simfile_add_event(simfile_chart_t* file, simfile_event_type_t type, simfile_event_generic_t event)
+void simfile_add_event(simfile_chart_t* file, simfile_event_type_t type, simfile_generic_event_t event)
 {
 
 }
