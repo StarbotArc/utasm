@@ -49,9 +49,10 @@ simfile_t* simfile_load(char* path)
 {
 	FILE* file = fopen(path, "r");
 
-	const char* as = path;
+	const char* as = path + strlen(path);
+	for (int i = strlen(path); *(as - 1) != '.'; i--) as--;
 
-	SIMFILE_LOAD_IF(as - 3, usm)(file);
+	SIMFILE_LOAD_IF("usm", usm)(file);
 	return NULL;
 }
 
@@ -59,12 +60,12 @@ void simfile_export(simfile_t* simfile, char* path)
 {
 	FILE* file = fopen(path, "w");
 
-	// const char* as = path + strlen(path);
-	// for (int i = strlen(path); *(as - 1) != '.'; i--) as--;
+	const char* as = path + strlen(path);
+	for (int i = strlen(path); *(as - 1) != '.'; i--) as--;
 
-	// SIMFILE_EXPORT_IF(as, sm)(simfile, file);
-	// SIMFILE_EXPORT_IF(as, ssc)(simfile, file);
-	SIMFILE_EXPORT_IF("usm", usm)(simfile, file);
+	SIMFILE_EXPORT_IF(as, sm)(simfile, file);
+	SIMFILE_EXPORT_IF(as, ssc)(simfile, file);
+	SIMFILE_EXPORT_IF(as, usm)(simfile, file);
 
 	fclose(file);
 }

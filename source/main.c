@@ -76,25 +76,19 @@ static WindowAPIKeyPress key_press(int button, int actions, int mods)
 {
 } */
 
-int main()
+static int main_create_window()
 {
-	bitfield_t bitf;
-	bitfield_set(bitf, 0b1101001, 28);
-
-	puts("Hello world!");
-
-	/*simfile_t* simfile = simfile_create();
-	simfile_export(simfile, "file.usm");
-
-	simfile_destroy(simfile);
-
+	/* Initialize the window library. */
 	if (window_library_init()) return 1;
 
+	/* Start constructing window. */
 	window_t* window_1 = window_create("UtaSM", 720, 720);
-	window_icon_t icon = { .width=128, .height=128, .data=icon_raw };
 
+	/* Set the icon. */
+	window_icon_t icon = { .width=128, .height=128, .data=icon_raw };
 	window_set_icon(window_1, &icon);
 
+	/* Set all callbacks. */
 	window_set_create_callback(window_1, create);
 	window_set_loop_callback(window_1, loop);
 	window_set_destroy_callback(window_1, destroy);
@@ -103,11 +97,34 @@ int main()
 
 	window_set_key_press_callback(window_1, key_press);
 
+	/* Run window. */
 	window_run(window_1);
 
+	/* Destroy window and the window library. */
 	window_destroy(window_1);
 
-	window_library_destroy();*/
+	window_library_destroy();
+
+	return 0;
+}
+
+int main()
+{
+	puts("Hello world!");
+
+	//bitfield_t bitf;
+	//bitfield_set(bitf, 0b1101001, 28);
+
+	simfile_t* simfile = simfile_load("file.usm");
+
+	if (simfile) simfile_destroy(simfile);
+
+	/*int win_error = main_create_window();
+	if (win_error)
+	{
+		puts("yeah the window ain't working");
+		return win_error;
+	}*/
 
 	return 0;
 }

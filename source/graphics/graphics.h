@@ -18,13 +18,13 @@ typedef struct s_graphics_pipeline
 	unsigned int header;
 	GladGLContext* context;
 
-	vector(uint32_t) buffers;
-	vector(uint32_t) vertex_arrays;
+	vec_uint32_t buffers;
+	vec_uint32_t vertex_arrays;
 
-	vector(uint32_t) texture_cache;
+	vec_uint32_t texture_cache;
 
 	uint32_t program_queued;
-	vector(uint32_t) shader_queue;
+	vec_uint32_t shader_queue;
 
 	uint32_t (*create_buffer)(struct s_graphics_pipeline* self, void* data, uint64_t size, uint32_t type, uint32_t usage);
 	int (*destroy_buffer)(struct s_graphics_pipeline* self, uint32_t buffer);

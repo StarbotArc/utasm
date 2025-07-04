@@ -32,31 +32,12 @@ event(stop, parameter(float, value))
 { \
 	for (int i = 0; i < NUM_##Y; i++) \
 	{ \
-		if (strcmp(X##_to_string(i), str)) return i; \
+		if (!strcmp(X##_to_string(i), str)) return i; \
 	} \
 	return Y##_UNKNOWN; \
 }
 
-typedef enum
-{
-	EVENT_UNKNOWN,
-
-	EVENT_BPM,
-	EVENT_STOP,
-
-	NUM_EVENT
-} simfile_event_type_t;
-
-static const char* event_type_strings[NUM_EVENT] =
-{
-	"unknown",
-
-	"bpm",
-	"stop",
-};
-
-#define event_type_to_string(X) event_type_strings[X]
-string_to_generic(event_type, EVENT);
+/* simfile_difficulty_t */
 
 typedef enum
 {
@@ -86,6 +67,71 @@ static const char* difficulty_strings[NUM_DIFF] =
 
 #define difficulty_to_string(X) difficulty_strings[X]
 string_to_generic(difficulty, DIFF);
+
+/* simfile_event_type_t */
+
+typedef enum
+{
+	EVENT_UNKNOWN,
+
+	EVENT_BPM,
+	EVENT_STOP,
+
+	NUM_EVENT
+} simfile_event_type_t;
+
+static const char* event_type_strings[NUM_EVENT] =
+{
+	"unknown",
+
+	"bpm",
+	"stop",
+};
+
+#define event_type_to_string(X) event_type_strings[X]
+string_to_generic(event_type, EVENT);
+
+/* simfile_note_t */
+
+typedef enum
+{
+	NOTE_UNKNOWN,
+
+	// worlds funniest redefinition.
+	NOTE_NONE = 0,
+
+	/* Single note types. */
+	NOTE_NORMAL,
+	NOTE_FAKE,
+	NOTE_LIFT,
+	NOTE_MINE,
+
+	/* Long note types. */
+	NOTE_LONG,
+	NOTE_ROLL,
+	NOTE_END,
+
+	NUM_NOTE
+} simfile_note_t;
+
+static const char* note_strings[NUM_NOTE] =
+{
+	"none",
+
+	"tap"
+	"fake",
+	"lift",
+	"mine",
+
+	"long",
+	"roll",
+	"end"
+};
+
+#define note_to_string(X) note_strings[X]
+string_to_generic(note, NOTE);
+
+/* simfile_style_t */
 
 typedef enum
 {
@@ -142,7 +188,7 @@ typedef struct
 	vector(simfile_bpm_event_t) bpms;
 	vector(simfile_stop_event_t) stops;
 
-	vector(uint32_t) rows;
+	vec_uint32_t rows;
 } simfile_chart_t;
 
 typedef struct

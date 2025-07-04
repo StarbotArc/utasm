@@ -3,9 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <util/bitfield.h>
+
 /* .usm internal constants. */
 
-struct { char name[32]; unsigned char keys; }
+struct usm_style { const char* name; unsigned char keys; }
 styles[10] =
 {
 	{ .name="dance-single", .keys=4 },
@@ -25,6 +27,7 @@ styles[10] =
 	{ .name="pump-couple", .keys=10 },
 	{ .name="pump-double", .keys=10 },
 };
+#define USM_STYLE_AMOUNT 10
 
 const char* difficulties[6] =
 {
@@ -44,6 +47,8 @@ typedef enum
 	TYPE_FLOAT,
 
 	TYPE_STRING,
+
+	TYPE_NOTES,
 
 	TYPE_NODE
 } usm_type_t;
@@ -67,6 +72,7 @@ typedef struct struct_usm_node
 		int i;
 		float f;
 		const char* str;
+		bitfield_t bitfield;
 		vec_usm_node_ptr_t nodes;
 	} value;
 	char* name;
@@ -80,12 +86,30 @@ typedef struct
 
 /* .usm utilities */
 
-static const char* usm_find_type(simfile_style_t style)
+static const char* usm_find_type(simfile_style_t style, uint8_t key_count)
 {
+	const char* begins = style_to_string(style);
+	uint32_t length = strlen(begins) - 1;
+
+	for (int i = 0; i < USM_STYLE_AMOUNT; i++)
+	{
+		struct usm_style selected = styles[i];
+
+		if (selected.keys == key_count)
+		{
+			if (!strncmp(begins, selected.name, length)) return selected.name;
+		}
+	}
+
 	return "unknown";
 }
 
 /* .usm parser */
+
+static int usm_note(char c)
+{
+
+}
 
 static int usm_legal(char c) {
 	return	(c >= 'A' && c <= 'Z') ||
@@ -96,23 +120,67 @@ static int usm_legal(char c) {
 static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 {
 	int pos = 0;
-	while (buffer[pos] == '\0')
+	while (buffer[pos] != '\0')
 	{
 		char current = buffer[pos];
+		putc(current, stdout);
+
+		if (usm_note(current))
+		{
+
+		}
 
 		if (usm_legal(current))
 		{
 			int length = 0;
-			while (buffer[pos + length]) length++;
+			while (usm_legal(buffer[pos + length])) length++;
 
+			if (buffer[pos + length] != ':') return 1;
 			if (length == 1) return 1;
 
-			char* nbuf = malloc(length);
-			memcpy(nbuf, buffer+pos, length);
+			// potential bottleneck.
+			char* nbuf = malloc(length + 1);
+			memcpy(nbuf, buffer + pos, length);
+			nbuf[length] = 0;
 
 			puts(nbuf);
 
 			free(nbuf);
+
+			state->scope++;
+			pos += length + 1;
+			continue;
+		}
+
+		if (current == '"')
+		{
+			pos++;
+
+			int length = 0;
+			while (1)
+			{
+				if (buffer[pos + length] == '"')
+				{
+					char* nbuf = malloc(length + 1);
+					memcpy(nbuf, buffer + pos, length);
+					nbuf[length] = 0;
+
+					puts(nbuf);
+
+					free(nbuf);
+
+					pos += length + 1;
+					break;
+				}
+
+				length++;
+			}
+			continue;
+		}
+
+		if (current == ';')
+		{
+			state->scope--;
 		}
 
 		pos++;
@@ -125,7 +193,8 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 
 simfile_t* _usm_load(FILE* file)
 {
-	simfile_t* simfile = malloc(sizeof *simfile);
+	// WARNING: don't malloc here lol
+	// simfile_t* simfile = malloc(sizeof *simfile);
 
 	struct metadata {
 		char name[64];
@@ -141,6 +210,8 @@ simfile_t* _usm_load(FILE* file)
 
 	global.parent = NULL;
 	global.name = "global";
+
+	puts("hi guys");
 
 	char buffer[256];
 	while (fgets(buffer, 256, file))
@@ -176,13 +247,13 @@ void _usm_export(simfile_t* simfile, FILE* file)
 	const char* chart_temp =
 	"chart:\n"
 	"	%s%d:\n"
-	"		type:\"%s\"\n"
+	"		type:\"%s\";\n"
 	"		notedata:\n";
 	fprintf(
 		file, chart_temp,
 		difficulties[chart->difficulty],
 		chart->meter,
-		usm_find_type(chart->style)
+		usm_find_type(chart->style, chart->key_count)
 	);
 
 	char buffer[33];
@@ -200,5 +271,5 @@ void _usm_export(simfile_t* simfile, FILE* file)
 
 		fprintf(file, "\t\t\t%s,\n", buffer);
 	}
-	fprintf(file, "\t;\t\t;\n;");
+	fprintf(file, "\t\t;\n\t;\n;");
 }
