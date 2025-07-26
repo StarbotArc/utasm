@@ -16,8 +16,14 @@
 
 #define parameter(T, X) T X;
 
-event(bpm, parameter(float, value))
-event(stop, parameter(float, value))
+event(
+	bpm,
+	parameter(float, value)
+)
+event(
+	stop,
+	parameter(float, value)
+)
 
 #undef event
 #undef parameter
@@ -66,7 +72,7 @@ static const char* difficulty_strings[NUM_DIFF] =
 };
 
 #define difficulty_to_string(X) difficulty_strings[X]
-string_to_generic(difficulty, DIFF);
+string_to_generic(difficulty, DIFF)
 
 /* simfile_event_type_t */
 
@@ -89,7 +95,7 @@ static const char* event_type_strings[NUM_EVENT] =
 };
 
 #define event_type_to_string(X) event_type_strings[X]
-string_to_generic(event_type, EVENT);
+string_to_generic(event_type, EVENT)
 
 /* simfile_note_t */
 
@@ -112,9 +118,9 @@ typedef enum
 	NOTE_END,
 
 	NUM_NOTE
-} simfile_note_t;
+} simfile_note_type_t;
 
-static const char* note_strings[NUM_NOTE] =
+static const char* note_type_strings[NUM_NOTE] =
 {
 	"none",
 
@@ -128,8 +134,8 @@ static const char* note_strings[NUM_NOTE] =
 	"end"
 };
 
-#define note_to_string(X) note_strings[X]
-string_to_generic(note, NOTE);
+#define note_type_to_string(X) note_type_strings[X]
+string_to_generic(note_type, NOTE)
 
 /* simfile_style_t */
 
@@ -158,7 +164,7 @@ static const char* style_strings[NUM_STYLE] =
 };
 
 #define style_to_string(X) style_strings[X]
-string_to_generic(style, STYLE);
+string_to_generic(style, STYLE)
 
 #undef string_to_generic
 
@@ -172,9 +178,12 @@ typedef union
 
 typedef struct
 {
-	uint8_t size;
-	uint16_t data;
-} simfile_row_t;
+	uint8_t col : 5;
+	float beat;
+	simfile_note_type_t type : 3;
+} simfile_note_t;
+
+typedef vector(simfile_note_t) vec_simfile_note_t;
 
 typedef struct
 {
@@ -188,7 +197,7 @@ typedef struct
 	vector(simfile_bpm_event_t) bpms;
 	vector(simfile_stop_event_t) stops;
 
-	vec_uint32_t rows;
+	vec_simfile_note_t notes;
 } simfile_chart_t;
 
 typedef struct
@@ -208,6 +217,7 @@ void simfile_export(simfile_t* simfile, char* path);
 
 void simfile_destroy(simfile_t* simfile);
 
-void simfile_add_event(simfile_chart_t* file, simfile_event_type_t type, simfile_generic_event_t event);
+void simfile_add_note(simfile_chart_t* chart, simfile_note_type_t note_type, float beat, uint8_t col);
+void simfile_add_event(simfile_chart_t* chart, simfile_event_type_t type, simfile_generic_event_t event);
 
 #endif//__UTASM_SIMFILE_SIMFILE_H__

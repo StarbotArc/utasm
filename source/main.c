@@ -115,7 +115,11 @@ int main()
 	//bitfield_t bitf;
 	//bitfield_set(bitf, 0b1101001, 28);
 
-	simfile_t* simfile = simfile_load("file.usm");
+	simfile_t* simfile = simfile_create();
+	simfile_export(simfile, "file.usm");
+	simfile_destroy(simfile);
+
+	simfile = simfile_load("file.usm");
 
 	if (simfile) simfile_destroy(simfile);
 

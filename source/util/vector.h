@@ -22,7 +22,7 @@
 /*
  * Initializes vectors, so they don't break in allocation
  */
-#define vector_init(variable)	variable.alloc = 0;
+#define vector_init(variable)	variable.alloc = 0
 
 /*
  * Creates vector and allocates memory needed for it.
@@ -71,7 +71,7 @@
 #define vector_pop(from, to)	do { \
 									assert(("Popping an element from a vector with no size.", from.size)); \
 									assert(("Popping an element from an uninitialized vector.", from.alloc > 0 && from.data)); \
-									to = from.data[from.size--]; \
+									to = from.data[--from.size]; \
 								} while (0)
 
 /*

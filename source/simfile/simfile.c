@@ -28,19 +28,20 @@ simfile_t* simfile_create()
 	simfile->charts = malloc(sizeof *simfile->charts);
 	simfile_chart_t* chart = simfile->charts;
 
-	chart->style = string_to_style("dance");
+	chart->style = string_to_style("pump");
 	chart->difficulty = string_to_difficulty("easy");
 	chart->meter = 0;
 
-	chart->key_count = 4;
+	chart->key_count = 5;
 
-	vector_init(chart->rows);
-	vector_new(chart->rows, 4);
+	vector_init(chart->notes);
+	vector_new(chart->notes, 8);
 
 	for (int i = 0; i < 4; i++)
 	{
-		vector_push(chart->rows, 1 << i);
-		printf("%d\n", chart->rows.data[i]);
+		simfile_note_t n = { .col=i, .beat=(float) i/4.0f, .type=NOTE_NORMAL };
+		vector_push(chart->notes, n);
+		printf("%d\n", chart->notes.data[i].col);
 	}
 
 	return simfile;
@@ -72,7 +73,7 @@ void simfile_export(simfile_t* simfile, char* path)
 
 void simfile_destroy(simfile_t* simfile)
 {
-	vector_delete(simfile->charts->rows);
+	vector_delete(simfile->charts->notes);
 	free(simfile->charts);
 	free(simfile);
 }
