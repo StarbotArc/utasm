@@ -7,8 +7,6 @@
 
 #include <editor/editor.h>
 
-#include <util/bitfield.h>
-
 #define F(X) (int)X+289
 
 extern uint8_t icon_raw[];
@@ -112,12 +110,9 @@ int main()
 {
 	puts("Hello world!");
 
-	//bitfield_t bitf;
-	//bitfield_set(bitf, 0b1101001, 28);
-
-	simfile_t* simfile = simfile_create();
-	simfile_export(simfile, "file.usm");
-	simfile_destroy(simfile);
+	simfile_t* simfile; // = simfile_create();
+	//simfile_export(simfile, "file.usm");
+	//simfile_destroy(simfile);
 
 	simfile = simfile_load("file.usm");
 

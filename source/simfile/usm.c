@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <util/bitfield.h>
-
 /* .usm internal constants. */
 
 struct usm_style { const char* name; unsigned char keys; }
@@ -61,6 +59,13 @@ typedef enum
 
 	// TODO: get more specific once finished.
 	STATUS_ERROR,
+
+	STATUS_ERROR_EXTRA_DECIMAL,
+	STATUS_ERROR_ILLEGAL_CHARACTER,
+	STATUS_ERROR_NO_NAME,
+	STATUS_ERROR_OVERFLOW,
+	STATUS_ERROR_SYNTAX,
+	STATUS_ERROR_WRONG_TYPE,
 } usm_status_t;
 
 typedef vector(struct struct_usm_node*) vec_usm_node_ptr_t;
@@ -85,6 +90,8 @@ typedef struct struct_usm_node
 
 typedef struct
 {
+	uint32_t note_search_offset;
+
 	uint32_t bpm_offset;
 	uint32_t bpm_amount;
 
@@ -131,26 +138,24 @@ static void usm_destroy_node(usm_node_t* node)
 
 	switch (node->type)
 	{
+		case TYPE_STRING:
+			free(node->value.str);
+			break;
 		case TYPE_NOTES:
 			vector_delete(node->value.notes);
 			break;
 		case TYPE_NODES:
 		{
-			vec_usm_node_ptr_t node_vec = node->value.nodes;
-			for (int i = 0; i < node_vec.size; i++)
+			usm_node_t* tmp;
+			while (node->value.nodes.size)
 			{
 				usm_node_t* tmp;
-				vector_pop(node_vec, tmp);
-
-				printf("%s,%d\n", tmp->name, tmp->type);
+				vector_pop(node->value.nodes, tmp);
 
 				usm_destroy_node(tmp);
 			}
-			vector_delete(node_vec);
+			vector_delete(node->value.nodes);
 		} break;
-		case TYPE_STRING:
-			free(node->value.str);
-			break;
 		default:
 			break;
 	}
@@ -212,9 +217,17 @@ static void usm_print_node(usm_node_t* node, int tab, int pflag)
 
 /* .usm parser */
 
-#define usm_type_guard(X) if (state->global->type != X && state->global->type) return STATUS_ERROR
+#define usm_type_guard(X) if (state->global->type != X && state->global->type) return STATUS_ERROR_WRONG_TYPE
 
-static simfile_note_type_t usm_note(char c)
+#define usm_number_type_guard (state->global->type == TYPE_FLOAT || state->global->type == TYPE_INTEGER || !state->global->type)
+#define usm_notes_type_guard (state->global->type == TYPE_NOTES || !state->global->type)
+
+static int usm_number(char c)
+{
+	return c >= '0' && c <= '9';
+}
+
+static int usm_note(char c)
 {
 	return	(c >= '0' && c <= '7') ||
 			c == ',';
@@ -226,16 +239,77 @@ static int usm_legal(char c) {
 			(c >= '0' && c <= '9');
 }
 
+/*
+ * requires potential cleanups.
+ *
+ * convert into modular structure, i.e:
+ * 	usm_process(number);
+ * 	usm_process(notes);
+ * 	...
+ *
+ * 	usm_process as macro: do {
+ * 		int s = usm_process_number(state, buffer);
+ * 		if (s) return s;
+ * 	} while (0);
+ */
 static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 {
 	int pos = 0;
 	while (buffer[pos] != '\0')
 	{
 		char current = buffer[pos];
-		//putc(current, stdout);
 
-		if (usm_note(current))
+		if ((usm_number(current) || current == '.') && usm_number_type_guard)
 		{
+			puts("Number");
+			int length = 0;
+			int be_float = 0;
+
+			char n_buffer[16];
+			while (1)
+			{
+				char lcurrent = buffer[pos+length];
+
+				if (lcurrent == ';' || lcurrent == '\n')
+					break;
+
+				if (!usm_number(lcurrent) && lcurrent != '.')
+					return STATUS_ERROR_ILLEGAL_CHARACTER;
+
+				if (length >= 15)
+					return STATUS_ERROR_OVERFLOW;
+
+				if (lcurrent == '.')
+				{
+					if (be_float)
+						return STATUS_ERROR_EXTRA_DECIMAL;
+
+					be_float = 1;
+				}
+
+				n_buffer[length] = buffer[pos + length];
+				length++;
+			}
+			n_buffer[length] = 0;
+
+			if (buffer[pos + length] == ';')
+			{
+				if (be_float)
+					state->global->value.f = atof(n_buffer);
+				else
+					state->global->value.i = atoi(n_buffer);
+
+				if (state->global->type == TYPE_NONE)
+					state->global->type = be_float? TYPE_FLOAT : TYPE_INTEGER;
+
+				pos += length;
+				continue;
+			}
+		}
+
+		if (usm_note(current) && usm_notes_type_guard)
+		{
+			puts("Notes");
 			/*
 			 * start figuring out how the notes are snapped by
 			 * taking advantage of our knowledge of when a notefield
@@ -243,12 +317,11 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 			 * integer offset.
 			 */
 
-			/*vec_simfile_note_t notes = state->global.value.notes;
-			if (!vector_allocated(notes))
+			if (state->global->type == TYPE_NONE)
 			{
-				state->global.type = TYPE_NOTES;
-				vector_init(notes);
-				vector_new(notes, 4);
+				state->global->type = TYPE_NOTES;
+				vector_init(state->global->value.notes);
+				vector_new(state->global->value.notes, 4);
 			}
 
 			if (current == ',')
@@ -256,8 +329,10 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 				state->bpm_amount = 0;
 				state->bpm_offset++;
 
+				state->note_search_offset = state->global->value.notes.size;
+
 				continue;
-			}*/
+			}
 
 			int i = 0;
 			while (usm_note(current))
@@ -267,7 +342,7 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 				// ignore this for now
 				if (current == ',') continue;
 
-				/*current = buffer[pos++];
+				current = buffer[pos++];
 				if (current >= '0')
 				{
 					simfile_note_t note =
@@ -276,8 +351,8 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 						.col=i++,
 						.type=current - '0'
 					};
-					vector_push(notes, note);
-				}*/
+					vector_push(state->global->value.notes, note);
+				}
 			}
 			state->bpm_amount++;
 			continue;
@@ -297,21 +372,18 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 			int length = 0;
 			while (usm_legal(buffer[pos + length])) length++;
 
-			if (buffer[pos + length] != ':') return 1;
-			if (length == 1) return 1;
+			if (buffer[pos + length] != ':') return STATUS_ERROR_SYNTAX;
+			if (length == 1) return STATUS_ERROR_NO_NAME;
 
 			// potential bottleneck.
 			char* nbuf = malloc(length + 1);
 			memcpy(nbuf, buffer + pos, length);
 			nbuf[length] = 0;
 
-			puts(nbuf);
-
 			usm_node_t* node = usm_create_node(nbuf, state->global);
 			vector_push(state->global->value.nodes, node);
 			state->global = node;
 
-			printf("%d\n", ++state->scope);
 			pos += length + 1;
 			continue;
 		}
@@ -332,8 +404,6 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 			memcpy(sbuf, buffer + pos, length);
 			sbuf[length] = 0;
 
-			puts(sbuf);
-
 			state->global->value.str = sbuf;
 
 			pos += length + 1;
@@ -343,6 +413,7 @@ static usm_status_t usm_parse(usm_state_t* state, char* buffer)
 
 		if (current == ';')
 		{
+			state->global = state->global->parent;
 			state->scope--;
 		}
 
@@ -359,44 +430,24 @@ simfile_t* _usm_load(FILE* file)
 	// WARNING: don't malloc here lol
 	// simfile_t* simfile = malloc(sizeof *simfile);
 
-	struct metadata {
-		char name[64];
-		char subtitle[64];
-		char artist[64];
-		char author[64];
-	};
-
 	usm_state_t state;
 	state.scope = 0;
 
 	usm_node_t* global = usm_create_node(NULL, NULL);
 	state.global = global;
 
-	const char* str = "test";
-	char* alloced = malloc(5);
-	memcpy(alloced, str, 5);
-
-	usm_node_t* test = usm_create_node(alloced, global);
-
-	test->type = TYPE_INTEGER;
-	test->value.i = 0;
-
-	global->type = TYPE_NODES;
-	vector_init(global->value.nodes);
-	vector_new(global->value.nodes, 1);
-	vector_push(global->value.nodes, test);
-
 	puts("hi guys");
 
-	/*char buffer[256];
+	char buffer[256];
 	while (fgets(buffer, 256, file))
 	{
-		if (usm_parse(&state, buffer))
+		int error = usm_parse(&state, buffer);
+		if (error)
 		{
-			puts("yeah no");
+			printf("ERROR: %d", error);
 			break;
 		}
-	}*/
+	}
 
 	usm_print_node(global, 0, 0);
 

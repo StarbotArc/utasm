@@ -4,7 +4,7 @@
 #include <graphics/graphics.h>
 
 static const char* vertex_shader_source =
-"#version 440 core\n"
+"#version 330 core\n"
 "layout (location=0) in vec4 position;\n"
 
 "void main()\n {"
@@ -13,7 +13,7 @@ static const char* vertex_shader_source =
 ;
 
 static const char* fragment_shader_source =
-"#version 440 core\n"
+"#version 330 core\n"
 "out vec4 FragColor;\n"
 
 "void main()\n {"
